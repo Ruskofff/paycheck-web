@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PayCheck — Quota 650h</title>
+  <link rel="stylesheet" href="/css/main.css" />
+</head>
+<body>
+
+<nav id="sidebar">
+  <div class="logo">💰 PayCheck</div>
+  <a href="/pages/dashboard.html"><span class="icon">🏠</span> Dashboard</a>
+  <a href="/pages/job.html?id=1"><span class="icon">💼</span> Job A</a>
+  <a href="/pages/job.html?id=2"><span class="icon">💼</span> Job B</a>
+  <a href="/pages/quota.html" class="active"><span class="icon">⏱️</span> Quota 650h</a>
+  <a href="/pages/timesheet.html"><span class="icon">📋</span> Journal</a>
+</nav>
+
+<main id="content">
+  <h1>Quota étudiant 650h</h1>
+  <p class="subtitle" id="quota-year">Année <span id="year-label">—</span></p>
+
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px">
+      <span id="quota-hours-used" style="font-size:28px;font-weight:700;color:var(--primary)">— h</span>
+      <span style="color:var(--text-muted)">/ 650 h</span>
+    </div>
+    <div class="progress-bar" style="margin-bottom:12px">
+      <div class="progress-bar__fill" id="quota-bar" style="width:0%"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text-muted)">
+      <span><strong id="quota-percent">0</strong>% utilisé</span>
+      <span><strong id="quota-remaining">650</strong> h restantes</span>
+    </div>
+  </div>
+
+  <div class="card" id="quota-alert-card" style="display:none">
+    <div class="alert" id="quota-alert"></div>
+  </div>
+
+  <!-- Détail des fiches contribuant au quota -->
+  <div class="card">
+    <h2>Détail des heures comptabilisées</h2>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Job</th>
+            <th>Période</th>
+            <th>Heures déclarées</th>
+            <th>Cumul</th>
+          </tr>
+        </thead>
+        <tbody id="quota-detail-tbody">
+          <tr><td colspan="4" class="empty">Chargement…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Infos</h2>
+    <p style="color:var(--text-muted);line-height:1.7">
+      En Belgique, un étudiant jobiste bénéficie d'un quota annuel de <strong>650 heures</strong>
+      de travail à cotisations sociales réduites (2,71% au lieu du taux normal).<br><br>
+      Ce quota est <strong>commun à tous tes jobs</strong> et se remet à zéro chaque 1er janvier.<br><br>
+      Les heures affichées ici proviennent des fiches de paie importées.
+    </p>
+  </div>
+</main>
+
+<script src="/js/utils.js"></script>
+<script src="/js/api.js"></script>
+<script src="/js/quota.js"></script>
+</body>
+</html>

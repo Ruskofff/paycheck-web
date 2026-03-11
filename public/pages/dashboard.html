@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PayCheck — Dashboard</title>
+  <link rel="stylesheet" href="/css/main.css" />
+</head>
+<body>
+
+<!-- ── Navigation ─────────────────────────────────────────────────────────── -->
+<nav id="sidebar">
+  <div class="logo">💰 PayCheck</div>
+  <a href="/pages/dashboard.html" class="active"><span class="icon">🏠</span> Dashboard</a>
+  <a href="/pages/job.html?id=1"><span class="icon">💼</span> Job A</a>
+  <a href="/pages/job.html?id=2"><span class="icon">💼</span> Job B</a>
+  <a href="/pages/quota.html"><span class="icon">⏱️</span> Quota 650h</a>
+  <a href="/pages/timesheet.html"><span class="icon">📋</span> Journal</a>
+</nav>
+
+<!-- ── Contenu ────────────────────────────────────────────────────────────── -->
+<main id="content">
+
+  <!-- En-tête avec sélecteur d'année -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;flex-wrap:wrap;gap:12px">
+    <h1 style="margin:0">Dashboard</h1>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span style="font-size:13px;color:var(--text-muted)">Année :</span>
+      <div id="year-tabs" style="display:flex;gap:6px"></div>
+    </div>
+  </div>
+  <p class="subtitle">Vue d'ensemble de tes revenus étudiants</p>
+
+  <!-- Stats globales de l'année -->
+  <div class="card-grid" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr))">
+    <div class="card">
+      <div class="stat-label">Total gagné</div>
+      <div class="stat-value" id="stat-total">—</div>
+    </div>
+    <div class="card">
+      <div class="stat-label">Heures déclarées</div>
+      <div class="stat-value" id="stat-hours">—</div>
+    </div>
+    <div class="card">
+      <div class="stat-label">Fiches importées</div>
+      <div class="stat-value" id="stat-count">—</div>
+    </div>
+  </div>
+
+  <!-- Cartes jobs -->
+  <div class="card-grid" id="job-cards">
+    <div class="card" style="text-align:center;color:var(--text-muted)">Chargement…</div>
+  </div>
+
+  <!-- Graphique évolution revenus -->
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+      <h2 style="margin:0">Évolution des revenus</h2>
+      <select id="chart-period" class="btn btn-ghost" style="padding:6px 12px">
+        <option value="monthly" selected>Par mois</option>
+        <option value="weekly">Par semaine</option>
+      </select>
+    </div>
+    <canvas id="revenue-chart" height="90"></canvas>
+  </div>
+
+  <!-- Répartition par job -->
+  <div class="card" style="max-width:400px">
+    <h2>Répartition par job</h2>
+    <canvas id="distribution-chart" height="200"></canvas>
+    <div id="distribution-legend" style="margin-top:16px;display:flex;gap:16px;justify-content:center"></div>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script src="/js/utils.js"></script>
+<script src="/js/api.js"></script>
+<script src="/js/dashboard.js"></script>
+</body>
+</html>

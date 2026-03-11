@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PayCheck — Détail job</title>
+  <link rel="stylesheet" href="/css/main.css" />
+</head>
+<body>
+
+<nav id="sidebar">
+  <div class="logo">💰 PayCheck</div>
+  <a href="/pages/dashboard.html"><span class="icon">🏠</span> Dashboard</a>
+  <a href="/pages/job.html?id=1" id="nav-job-a"><span class="icon">💼</span> Job A</a>
+  <a href="/pages/job.html?id=2" id="nav-job-b"><span class="icon">💼</span> Job B</a>
+  <a href="/pages/quota.html"><span class="icon">⏱️</span> Quota 650h</a>
+  <a href="/pages/timesheet.html"><span class="icon">📋</span> Journal</a>
+</nav>
+
+<main id="content">
+  <div id="alerts"></div>
+
+  <!-- En-tête job -->
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;gap:16px;flex-wrap:wrap">
+    <div>
+      <h1 id="job-title">Chargement…</h1>
+      <p class="subtitle" id="job-employer">—</p>
+    </div>
+    <button class="btn btn-ghost" id="btn-edit-job">✏️ Modifier</button>
+  </div>
+
+  <!-- Stats rapides -->
+  <div class="card-grid">
+    <div class="card">
+      <div class="stat-label">Dernier net perçu</div>
+      <div class="stat-value" id="stat-last-net">—</div>
+    </div>
+    <div class="card">
+      <div class="stat-label">Total perçu (année)</div>
+      <div class="stat-value" id="stat-year-total">—</div>
+    </div>
+    <div class="card">
+      <div class="stat-label">Heures déclarées (année)</div>
+      <div class="stat-value" id="stat-year-hours">—</div>
+    </div>
+  </div>
+
+  <!-- Import PDF -->
+  <div class="card">
+    <h2>Importer des fiches de paie</h2>
+    <label class="upload-zone" id="upload-zone">
+      <input type="file" id="pdf-input" accept=".pdf" multiple />
+      <div class="empty-icon">📄</div>
+      <p>Clique ou glisse tes PDFs ici</p>
+      <p style="font-size:12px;margin-top:4px">Plusieurs fichiers acceptés</p>
+    </label>
+    <div id="import-results" style="margin-top:12px"></div>
+  </div>
+
+  <!-- Liste des fiches -->
+  <div class="card">
+    <h2>Fiches de paie</h2>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Période</th>
+            <th>Heures fiche</th>
+            <th>Heures pointées</th>
+            <th>Écart</th>
+            <th>Taux horaire</th>
+            <th>Indemnité dépl.</th>
+            <th>Net à payer</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="payslips-tbody">
+          <tr><td colspan="6" class="empty">Chargement…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<!-- Modal modifier job -->
+<div class="modal-backdrop" id="modal-edit">
+  <div class="modal">
+    <h2>Modifier le job</h2>
+    <div class="form-group" style="margin-bottom:16px">
+      <label>Nom de l'employeur</label>
+      <input type="text" id="edit-employer" placeholder="ex: Interim XYZ" />
+    </div>
+    <div class="form-group">
+      <label>Taux horaire de référence (€/h)</label>
+      <input type="number" id="edit-rate" step="0.01" placeholder="ex: 13.62" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="btn-cancel-edit">Annuler</button>
+      <button class="btn btn-primary" id="btn-save-edit">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<script src="/js/utils.js"></script>
+<script src="/js/api.js"></script>
+<script src="/js/job.js"></script>
+</body>
+</html>

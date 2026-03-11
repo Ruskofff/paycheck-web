@@ -1,0 +1,20 @@
+{
+  "name": "paycheck-web",
+  "version": "1.0.0",
+  "description": "Suivi des fiches de paie étudiantes - Interface web locale",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "multer": "^1.4.5-lts.1",
+    "mysql2": "^3.9.7",
+    "pdfjs-dist": "^2.16.105"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.3"
+  }
+}
