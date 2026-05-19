@@ -72,24 +72,39 @@ async function parsePdf(filePath, originalName) {
     result.periodEnd   = parseDate(periodMatch[2]);
   }
 
-  // Heures : "6,75 u"
-  const hoursMatch = text.match(/([\d,]+)\s*[Uu]\b/);
-  if (hoursMatch) {
-    const h = parseFloat(hoursMatch[1].replace(',', '.'));
-    if (!isNaN(h)) result.hoursDeclared = h;
-  }
+  // Toutes les lignes "X,XX u TAUX" — on garde celle avec le plus d'heures (job principal)
+  // Si plusieurs missions, le net est recalculé au prorata de la mission principale
+  const lineMatches = [...text.matchAll(/([\d,]+)\s*[Uu]\s+([\d,]+)/g)];
+  if (lineMatches.length > 0) {
+    let missions = [];
+    for (const m of lineMatches) {
+      const h = parseFloat(m[1].replace(',', '.'));
+      const r = parseFloat(m[2].replace(',', '.'));
+      if (!isNaN(h) && !isNaN(r)) missions.push({ h, r });
+    }
 
-  // Taux horaire : après les heures "6,75 u   13,6204   €"
-  const rateMatch = text.match(/[\d,]+\s*[Uu]\s+([\d,]+)\s*€/);
-  if (rateMatch) {
-    const r = parseFloat(rateMatch[1].replace(',', '.'));
-    if (!isNaN(r)) result.hourlyRate = r;
+    // Mission principale = celle avec le plus d'heures
+    const main = missions.reduce((best, cur) => cur.h > best.h ? cur : best, missions[0]);
+    result.hoursDeclared = main.h;
+    result.hourlyRate    = main.r;
+
+    // Si plusieurs missions sur la même fiche, le net = brut de la mission principale (h × taux)
+    // Les déductions globales (cotisation, etc.) ne sont pas répartissables proprement
+    if (missions.length > 1) {
+      result._netOverride = parseFloat((main.h * main.r).toFixed(2));
+    }
   }
 
   // Net à payer : "Net   € 91,27"
   const netMatch = text.match(/\bNet\b\s*€\s*([\d,.]+)/);
   if (netMatch) {
-    result.netSalary = parseAmount(netMatch[1]);
+    const totalNet = parseAmount(netMatch[1]);
+    if (result._netOverride != null) {
+      result.netSalary = result._netOverride;
+      delete result._netOverride;
+    } else {
+      result.netSalary = totalNet;
+    }
   }
 
   // Indemnité de déplacement : "Indemnité déplacement ... € 1,82"

@@ -55,3 +55,22 @@ function showAlert(container, message, type = 'info') {
 function getParam(name) {
   return new URLSearchParams(window.location.search).get(name);
 }
+
+/**
+ * Met à jour les noms de jobs dans la nav depuis l'API.
+ * Les liens nav doivent avoir l'attribut data-job-id et un <span> pour le texte.
+ * @param {number|null} activeJobId — marque ce job comme actif
+ */
+async function loadNav(activeJobId = null) {
+  try {
+    const jobs = await API.jobs.getAll();
+    document.querySelectorAll('nav#sidebar a[data-job-id]').forEach(link => {
+      const jid = parseInt(link.dataset.jobId);
+      const job = jobs.find(j => j.id === jid);
+      if (!job) return;
+      const nameSpan = link.querySelector('span:last-child');
+      if (nameSpan) nameSpan.textContent = job.name;
+      if (activeJobId && jid === activeJobId) link.classList.add('active');
+    });
+  } catch (e) { /* erreur silencieuse sur la nav */ }
+}

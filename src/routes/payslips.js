@@ -29,6 +29,8 @@ const router = express.Router();
 router.get('/',               payslipsController.getAll);
 router.get('/job/:jobId',     payslipsController.getByJob);
 router.post('/import',        upload.array('pdfs', 20), payslipsController.importPdfs);
+router.post('/manual',        payslipsController.createManual);
+router.patch('/:id',          payslipsController.patch);
 router.delete('/:id',         payslipsController.remove);
 
 module.exports = router;

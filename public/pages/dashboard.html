@@ -12,8 +12,9 @@
 <nav id="sidebar">
   <div class="logo">💰 PayCheck</div>
   <a href="/pages/dashboard.html" class="active"><span class="icon">🏠</span> Dashboard</a>
-  <a href="/pages/job.html?id=1"><span class="icon">💼</span> Job A</a>
-  <a href="/pages/job.html?id=2"><span class="icon">💼</span> Job B</a>
+  <a href="/pages/job.html?id=1" data-job-id="1"><span class="icon">💼</span> <span>Multiwex</span></a>
+  <a href="/pages/job.html?id=2" data-job-id="2"><span class="icon">💼</span> <span>Adventure Valley Durbuy</span></a>
+  <a href="/pages/job.html?id=3" data-job-id="3"><span class="icon">📌</span> <span>Mission annexe</span></a>
   <a href="/pages/quota.html"><span class="icon">⏱️</span> Quota 650h</a>
   <a href="/pages/timesheet.html"><span class="icon">📋</span> Journal</a>
 </nav>
@@ -68,7 +69,24 @@
   <div class="card" style="max-width:400px">
     <h2>Répartition par job</h2>
     <canvas id="distribution-chart" height="200"></canvas>
-    <div id="distribution-legend" style="margin-top:16px;display:flex;gap:16px;justify-content:center"></div>
+    <div id="distribution-legend" style="margin-top:16px;display:flex;gap:16px;justify-content:center;flex-wrap:wrap"></div>
+  </div>
+
+  <!-- Détail mensuel par job -->
+  <div class="card">
+    <h2>Détail mensuel par job</h2>
+    <div class="table-wrapper">
+      <table>
+        <thead id="detail-thead"></thead>
+        <tbody id="detail-tbody"></tbody>
+        <tfoot>
+          <tr id="detail-tfoot-row" style="background:var(--bg)"></tr>
+        </tfoot>
+      </table>
+    </div>
+    <p id="detail-empty" style="color:var(--text-muted);font-style:italic;margin-top:8px;display:none">
+      Aucune fiche pour cette année.
+    </p>
   </div>
 </main>
 

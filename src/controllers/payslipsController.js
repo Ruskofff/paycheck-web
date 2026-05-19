@@ -104,6 +104,55 @@ async function importPdfs(req, res, next) {
 }
 
 /**
+ * POST /api/payslips/manual
+ * Crée une entrée manuelle (Mission annexe / Adventure Valley) sans PDF.
+ * Body: { job_id, period_start, period_end, hours_declared, hourly_rate, note?, actual_received? }
+ */
+async function createManual(req, res, next) {
+  try {
+    const { job_id, period_start, period_end, hours_declared, hourly_rate, note, actual_received } = req.body;
+
+    if (!job_id || !period_start || !period_end || !hours_declared || !hourly_rate) {
+      return res.status(400).json({ error: 'Champs obligatoires manquants.' });
+    }
+
+    const net_salary      = parseFloat(hours_declared) * parseFloat(hourly_rate);
+    const actualReceived  = actual_received != null && actual_received !== '' ? parseFloat(actual_received) : null;
+
+    await pool.query(
+      `INSERT INTO payslips (job_id, pdf_filename, period_start, period_end, hours_declared, hourly_rate, net_salary, actual_received)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [job_id, note || 'Saisie manuelle', period_start, period_end,
+       parseFloat(hours_declared), parseFloat(hourly_rate), net_salary, actualReceived]
+    );
+
+    res.json({ success: true, net_salary, actual_received: actualReceived });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * PATCH /api/payslips/:id
+ * Met à jour le montant réellement reçu sur le compte bancaire.
+ * Body: { actual_received }
+ */
+async function patch(req, res, next) {
+  try {
+    const { actual_received } = req.body;
+    const actualReceived = actual_received != null && actual_received !== '' ? parseFloat(actual_received) : null;
+
+    await pool.query(
+      'UPDATE payslips SET actual_received = ? WHERE id = ?',
+      [actualReceived, req.params.id]
+    );
+    res.json({ success: true, actual_received: actualReceived });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
  * DELETE /api/payslips/:id
  * Supprime une fiche de paie.
  */
@@ -116,4 +165,4 @@ async function remove(req, res, next) {
   }
 }
 
-module.exports = { getAll, getByJob, importPdfs, remove };
+module.exports = { getAll, getByJob, importPdfs, createManual, patch, remove };

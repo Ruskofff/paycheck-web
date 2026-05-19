@@ -1,28 +1,51 @@
-/* global API, formatDate, showAlert */
+/* global API, formatDate, showAlert, loadNav */
 
-let allEntries = [];
+let allEntries    = [];
+let timesheetJobs = [];
 let currentFilter = 'all';
+
+const BADGE_COLORS = ['badge-blue', 'badge-green', 'badge-orange', 'badge-red'];
 
 async function init() {
   document.getElementById('entry-date').valueAsDate = new Date();
+
+  timesheetJobs = (await API.jobs.getAll()).filter(j => !j.is_manual);
+
+  loadNav();
+  buildJobSelect();
+  buildFilterButtons();
   await loadAll();
   initForm();
   initFilters();
   initHoursPreview();
 }
 
+// ── Dropdown job ───────────────────────────────────────────────────────────────
+function buildJobSelect() {
+  const sel = document.getElementById('entry-job');
+  sel.innerHTML = timesheetJobs.map(j => `<option value="${j.id}">${j.name}</option>`).join('');
+}
+
+// ── Boutons de filtre ─────────────────────────────────────────────────────────
+function buildFilterButtons() {
+  const container = document.getElementById('filter-btns');
+  container.innerHTML = '';
+  timesheetJobs.forEach(job => {
+    const btn = document.createElement('button');
+    btn.className       = 'btn btn-ghost';
+    btn.dataset.job     = String(job.id);
+    btn.textContent     = job.name;
+    container.appendChild(btn);
+  });
+}
+
 // ── Charger toutes les entrées ────────────────────────────────────────────────
 async function loadAll() {
   try {
-    const [entriesA, entriesB] = await Promise.all([
-      API.timesheet.getByJob(1),
-      API.timesheet.getByJob(2),
-    ]);
-
-    allEntries = [
-      ...entriesA.map(e => ({ ...e, job_name: 'Job A' })),
-      ...entriesB.map(e => ({ ...e, job_name: 'Job B' })),
-    ].sort((a, b) => new Date(b.work_date) - new Date(a.work_date));
+    const results = await Promise.all(timesheetJobs.map(j => API.timesheet.getByJob(j.id)));
+    allEntries = timesheetJobs.flatMap((job, idx) =>
+      results[idx].map(e => ({ ...e, job_name: job.name }))
+    ).sort((a, b) => new Date(b.work_date) - new Date(a.work_date));
 
     renderTable();
   } catch (err) {
@@ -42,21 +65,24 @@ function renderTable() {
     return;
   }
 
-  tbody.innerHTML = entries.map(e => `
-    <tr>
-      <td>${formatDate(e.work_date)}</td>
-      <td><span class="badge ${e.job_id === 1 ? 'badge-blue' : 'badge-green'}">${e.job_name}</span></td>
-      <td>${e.time_start ? e.time_start.substring(0, 5) : '—'}</td>
-      <td>${e.time_end   ? e.time_end.substring(0, 5)   : '—'}</td>
-      <td>${e.break_minutes > 0 ? e.break_minutes + ' min' : '—'}</td>
-      <td><strong>${parseFloat(e.hours_worked).toFixed(2)} h</strong></td>
-      <td>${e.note || '—'}</td>
-      <td>
-        <button class="btn btn-danger" style="padding:4px 10px;font-size:12px"
-          onclick="deleteEntry(${e.id})">🗑️</button>
-      </td>
-    </tr>
-  `).join('');
+  tbody.innerHTML = entries.map(e => {
+    const jobIdx   = timesheetJobs.findIndex(j => j.id === e.job_id);
+    const badgeCls = BADGE_COLORS[jobIdx >= 0 ? jobIdx % BADGE_COLORS.length : 0];
+    return `
+      <tr>
+        <td>${formatDate(e.work_date)}</td>
+        <td><span class="badge ${badgeCls}">${e.job_name}</span></td>
+        <td>${e.time_start ? e.time_start.substring(0, 5) : '—'}</td>
+        <td>${e.time_end   ? e.time_end.substring(0, 5)   : '—'}</td>
+        <td>${e.break_minutes > 0 ? e.break_minutes + ' min' : '—'}</td>
+        <td><strong>${parseFloat(e.hours_worked).toFixed(2)} h</strong></td>
+        <td>${e.note || '—'}</td>
+        <td>
+          <button class="btn btn-danger" style="padding:4px 10px;font-size:12px"
+            onclick="deleteEntry(${e.id})">🗑️</button>
+        </td>
+      </tr>`;
+  }).join('');
 }
 
 // ── Aperçu des heures calculées en temps réel ─────────────────────────────────
@@ -64,9 +90,9 @@ function initHoursPreview() {
   const preview = document.getElementById('hours-preview');
 
   function updatePreview() {
-    const start  = document.getElementById('entry-time-start').value;
-    const end    = document.getElementById('entry-time-end').value;
-    const pause  = parseInt(document.getElementById('entry-break').value) || 0;
+    const start = document.getElementById('entry-time-start').value;
+    const end   = document.getElementById('entry-time-end').value;
+    const pause = parseInt(document.getElementById('entry-break').value) || 0;
 
     if (!start || !end) { preview.textContent = ''; return; }
 
@@ -93,12 +119,12 @@ function initHoursPreview() {
 // ── Formulaire ajout ──────────────────────────────────────────────────────────
 function initForm() {
   document.getElementById('btn-add-entry').addEventListener('click', async () => {
-    const job_id       = parseInt(document.getElementById('entry-job').value);
-    const work_date    = document.getElementById('entry-date').value;
-    const time_start   = document.getElementById('entry-time-start').value;
-    const time_end     = document.getElementById('entry-time-end').value;
+    const job_id        = parseInt(document.getElementById('entry-job').value);
+    const work_date     = document.getElementById('entry-date').value;
+    const time_start    = document.getElementById('entry-time-start').value;
+    const time_end      = document.getElementById('entry-time-end').value;
     const break_minutes = parseInt(document.getElementById('entry-break').value) || 0;
-    const note         = document.getElementById('entry-note').value.trim() || null;
+    const note          = document.getElementById('entry-note').value.trim() || null;
 
     if (!work_date || !time_start || !time_end) {
       showAlert(document.getElementById('alerts'), 'Date, pointage et dépointage sont obligatoires.', 'error');
@@ -121,10 +147,9 @@ function initForm() {
 
 // ── Filtres ───────────────────────────────────────────────────────────────────
 function initFilters() {
-  ['all', '1', '2'].forEach(val => {
-    const btn = document.querySelector(`[data-job="${val}"]`);
+  document.querySelectorAll('[data-job]').forEach(btn => {
     btn.addEventListener('click', () => {
-      currentFilter = val;
+      currentFilter = btn.dataset.job;
       document.querySelectorAll('[data-job]').forEach(b => b.className = 'btn btn-ghost');
       btn.className = 'btn btn-primary';
       renderTable();

@@ -36,10 +36,12 @@ const API = (() => {
 
     // Fiches de paie
     payslips: {
-      getAll:   ()        => request('GET',    '/api/payslips'),
-      getByJob: (jobId)   => request('GET',    `/api/payslips/job/${jobId}`),
-      import:   (formData)=> request('POST',   '/api/payslips/import', formData, true),
-      remove:   (id)      => request('DELETE', `/api/payslips/${id}`),
+      getAll:         ()        => request('GET',    '/api/payslips'),
+      getByJob:       (jobId)   => request('GET',    `/api/payslips/job/${jobId}`),
+      import:         (formData)=> request('POST',   '/api/payslips/import', formData, true),
+      createManual:   (body)    => request('POST',   '/api/payslips/manual', body),
+      updateReceived: (id, val) => request('PATCH',  `/api/payslips/${id}`, { actual_received: val }),
+      remove:         (id)      => request('DELETE', `/api/payslips/${id}`),
     },
 
     // Journal des heures
@@ -53,5 +55,6 @@ const API = (() => {
     quota: {
       getCurrent: () => request('GET', '/api/quota'),
     },
+
   };
 })();

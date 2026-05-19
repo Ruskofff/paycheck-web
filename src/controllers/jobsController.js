@@ -53,10 +53,10 @@ async function getById(req, res, next) {
  */
 async function update(req, res, next) {
   try {
-    const { employer_name, hourly_rate } = req.body;
+    const { name, employer_name, hourly_rate } = req.body;
     await pool.query(
-      'UPDATE jobs SET employer_name = ?, hourly_rate = ? WHERE id = ?',
-      [employer_name ?? null, hourly_rate ?? null, req.params.id]
+      'UPDATE jobs SET name = COALESCE(?, name), employer_name = ?, hourly_rate = ? WHERE id = ?',
+      [name ?? null, employer_name ?? null, hourly_rate ?? null, req.params.id]
     );
     const [rows] = await pool.query('SELECT * FROM jobs WHERE id = ?', [req.params.id]);
     res.json(rows[0]);

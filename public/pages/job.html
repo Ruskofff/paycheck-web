@@ -11,8 +11,9 @@
 <nav id="sidebar">
   <div class="logo">💰 PayCheck</div>
   <a href="/pages/dashboard.html"><span class="icon">🏠</span> Dashboard</a>
-  <a href="/pages/job.html?id=1" id="nav-job-a"><span class="icon">💼</span> Job A</a>
-  <a href="/pages/job.html?id=2" id="nav-job-b"><span class="icon">💼</span> Job B</a>
+  <a href="/pages/job.html?id=1" data-job-id="1"><span class="icon">💼</span> <span>Multiwex</span></a>
+  <a href="/pages/job.html?id=2" data-job-id="2"><span class="icon">💼</span> <span>Adventure Valley Durbuy</span></a>
+  <a href="/pages/job.html?id=3" data-job-id="3"><span class="icon">📌</span> <span>Mission annexe</span></a>
   <a href="/pages/quota.html"><span class="icon">⏱️</span> Quota 650h</a>
   <a href="/pages/timesheet.html"><span class="icon">📋</span> Journal</a>
 </nav>
@@ -45,8 +46,8 @@
     </div>
   </div>
 
-  <!-- Import PDF -->
-  <div class="card">
+  <!-- Import PDF (jobs normaux) -->
+  <div class="card" id="section-pdf">
     <h2>Importer des fiches de paie</h2>
     <label class="upload-zone" id="upload-zone">
       <input type="file" id="pdf-input" accept=".pdf" multiple />
@@ -57,6 +58,36 @@
     <div id="import-results" style="margin-top:12px"></div>
   </div>
 
+  <!-- Saisie manuelle (Mission annexe + Adventure Valley Durbuy) -->
+  <div class="card" id="section-manual" style="display:none">
+    <h2 id="manual-section-title">Ajouter une entrée</h2>
+    <div class="form-group" style="margin-bottom:16px">
+      <label id="label-manual-title">Description</label>
+      <input type="text" id="manual-title" placeholder="ex: Avril 2026" />
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px">
+      <div class="form-group">
+        <label id="label-manual-date">Date</label>
+        <input type="date" id="manual-date" />
+      </div>
+      <div class="form-group">
+        <label>Heures prestées</label>
+        <input type="number" id="manual-hours" step="0.25" placeholder="ex: 3" />
+      </div>
+      <div class="form-group">
+        <label>Taux horaire (€/h)</label>
+        <input type="number" id="manual-rate" step="0.0001" placeholder="ex: 14.1328" />
+      </div>
+    </div>
+    <div class="form-group" id="group-actual-received" style="margin-bottom:16px;display:none">
+      <label>Montant réel versé sur le compte (€) <span style="color:var(--text-muted);font-size:11px;font-weight:400">(optionnel — inclut trajet, ONSS étudiant…)</span></label>
+      <input type="number" id="manual-actual-received" step="0.01" placeholder="ex: 387.50" style="max-width:220px" />
+    </div>
+    <div id="manual-preview" style="margin-bottom:16px;font-size:14px;color:var(--text-muted)"></div>
+    <button class="btn btn-primary" id="btn-manual-save">Enregistrer</button>
+    <div id="manual-results" style="margin-top:12px"></div>
+  </div>
+
   <!-- Liste des fiches -->
   <div class="card">
     <h2>Fiches de paie</h2>
@@ -64,13 +95,15 @@
       <table>
         <thead>
           <tr>
-            <th>Période</th>
-            <th>Heures fiche</th>
-            <th>Heures pointées</th>
-            <th>Écart</th>
+            <th id="th-period">Période</th>
+            <th class="col-manual-date" style="display:none">Date</th>
+            <th>Heures</th>
+            <th class="col-timesheet">Heures pointées</th>
+            <th class="col-timesheet">Écart</th>
             <th>Taux horaire</th>
-            <th>Indemnité dépl.</th>
+            <th class="col-travel">Indemnité dépl.</th>
             <th>Net à payer</th>
+            <th class="col-actual" style="display:none">Reçu réellement</th>
             <th></th>
           </tr>
         </thead>
@@ -86,6 +119,10 @@
 <div class="modal-backdrop" id="modal-edit">
   <div class="modal">
     <h2>Modifier le job</h2>
+    <div class="form-group" style="margin-bottom:16px">
+      <label>Nom du job</label>
+      <input type="text" id="edit-name" placeholder="ex: Multiwex" />
+    </div>
     <div class="form-group" style="margin-bottom:16px">
       <label>Nom de l'employeur</label>
       <input type="text" id="edit-employer" placeholder="ex: Interim XYZ" />

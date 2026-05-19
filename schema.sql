@@ -11,14 +11,16 @@ CREATE TABLE IF NOT EXISTS jobs (
   name          VARCHAR(100)  NOT NULL,
   employer_name VARCHAR(150)      NULL,
   hourly_rate   DECIMAL(8,4)      NULL COMMENT 'Taux horaire de référence (€/h)',
+  is_manual     TINYINT(1)    NOT NULL DEFAULT 0 COMMENT 'Saisie manuelle (pas d import PDF)',
   created_at    TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
--- Données initiales : 2 jobs par défaut
-INSERT INTO jobs (name, employer_name) VALUES
-  ('Job A', NULL),
-  ('Job B', NULL);
+-- Données initiales : 3 jobs par défaut
+INSERT INTO jobs (name, employer_name, is_manual) VALUES
+  ('Multiwex', NULL, 0),
+  ('Adventure Valley Durbuy', NULL, 0),
+  ('Mission annexe', NULL, 1);
 
 -- ── Fiches de paie ────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS payslips (
@@ -30,11 +32,28 @@ CREATE TABLE IF NOT EXISTS payslips (
   hours_declared   DECIMAL(6,2)       NULL COMMENT 'Heures sur la fiche',
   hourly_rate      DECIMAL(8,4)       NULL COMMENT 'Taux horaire extrait du PDF',
   net_salary       DECIMAL(10,2)  NOT NULL COMMENT 'Net à payer (€)',
+  actual_received  DECIMAL(10,2)      NULL COMMENT 'Montant réellement versé sur le compte bancaire (€)',
   travel_allowance DECIMAL(8,2)       NULL COMMENT 'Indemnité de déplacement (€)',
   imported_at      TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE CASCADE,
   UNIQUE KEY uq_job_period (job_id, period_start, period_end)
+) ENGINE=InnoDB;
+
+-- ── Estimations provisoires (heures × taux avant fiche officielle) ───────────
+CREATE TABLE IF NOT EXISTS work_estimates (
+  id           INT           NOT NULL AUTO_INCREMENT,
+  job_id       INT           NOT NULL,
+  year         SMALLINT      NOT NULL,
+  month        TINYINT       NOT NULL COMMENT '1=Jan … 12=Déc',
+  hours_worked DECIMAL(6,2)  NOT NULL,
+  hourly_rate  DECIMAL(8,4)  NOT NULL COMMENT 'Taux approximatif saisi manuellement',
+  note         VARCHAR(255)      NULL,
+  created_at   TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at   TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE CASCADE,
+  UNIQUE KEY uq_job_ym (job_id, year, month)
 ) ENGINE=InnoDB;
 
 -- ── Journal des heures (saisie manuelle) ─────────────────────────────────────
